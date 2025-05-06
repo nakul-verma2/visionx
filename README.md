@@ -82,5 +82,5 @@ Use GPU where available for best performance (device=0 is used by default).
 
 AMP (mixed precision) is enabled by default for faster training.
 
-##💬 License
+## 💬 License
 This project is licensed under the MIT License. Feel free to use and modify it for personal or commercial projects.

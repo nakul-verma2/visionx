@@ -30,7 +30,7 @@ This project demonstrates real-time object detection using YOLOv8 integrated wit
 ├── runs/                   # YOLOv8 training results
 └── predictions/            # Saved predictions and labels
 ```
-##🛠 Requirements
+## 🛠 Requirements
 * Python ≥ 3.8
 
 * Ultralytics YOLOv8

@@ -18,8 +18,6 @@ This project demonstrates real-time object detection using YOLOv8 integrated wit
 
 ##📁 Directory Structure
 ```bash
-Copy
-Edit
 .
 ├── train.py                 # Training script with custom params
 ├── infer_images.py         # Static test image inference
@@ -30,7 +28,8 @@ Edit
 │   ├── val/
 │   └── test/
 ├── runs/                   # YOLOv8 training results
-└── predictions/            # Saved predictions and labels```
+└── predictions/            # Saved predictions and labels
+```
 ##🛠 Requirements
 *Python ≥ 3.8
 
@@ -45,7 +44,8 @@ Edit
 ##Install dependencies:
 
 ```bash
-pip install ultralytics opencv-python pyyaml torch```
+pip install ultralytics opencv-python pyyaml torch
+```
 ##🏋️‍♂️ Training
 Update yolo_params.yaml with your custom dataset paths and classes:
 
@@ -54,11 +54,13 @@ train: data/train/images
 val: data/val/images
 test: data/test
 nc: 3
-names: ['FireExtinguisher', 'ToolBox', 'OxygenTank']```
+names: ['FireExtinguisher', 'ToolBox', 'OxygenTank']
+```
 Then run:
 
 ```bash
-python train.py```
+python train.py
+```
 You can modify hyperparameters like epochs, learning rate, batch size directly in the script or via CLI args.
 
 
@@ -66,7 +68,8 @@ You can modify hyperparameters like epochs, learning rate, batch size directly i
 Enable live detection using OpenCV:
 
 ```bash
-python live_detect.py``
+python live_detect.py
+```
 Make sure your webcam is connected and accessible.
 
 ##📊 Evaluation

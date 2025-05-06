@@ -1,23 +1,23 @@
-🔍 Real-Time Object Detection with YOLOv8 & OpenCV
+#🔍 Real-Time Object Detection with YOLOv8 & OpenCV
 This project demonstrates real-time object detection using YOLOv8 integrated with OpenCV. Designed to detect custom objects such as fire extinguishers, toolboxes, and oxygen tanks, the solution supports both offline image inference and live webcam detection with GPU acceleration.
 
-📌 Features
-🚀 YOLOv8-powered object detection
+##📌 Features
+*🚀 YOLOv8-powered object detection
 
-🎥 Live detection using OpenCV and webcam
+*🎥 Live detection using OpenCV and webcam
 
-🖼️ Inference on custom test image datasets
+*🖼️ Inference on custom test image datasets
 
-🧠 Training from scratch on custom data
+*🧠 Training from scratch on custom data
 
-💾 Auto-saving of predicted images and bounding box labels
+*💾 Auto-saving of predicted images and bounding box labels
 
-🧼 GPU memory management & OOM error handling
+*🧼 GPU memory management & OOM error handling
 
-📊 Evaluation metrics on test data
+*📊 Evaluation metrics on test data
 
-📁 Directory Structure
-bash
+##📁 Directory Structure
+```bash
 Copy
 Edit
 .
@@ -30,76 +30,54 @@ Edit
 │   ├── val/
 │   └── test/
 ├── runs/                   # YOLOv8 training results
-└── predictions/            # Saved predictions and labels
-🛠 Requirements
-Python ≥ 3.8
+└── predictions/            # Saved predictions and labels```
+##🛠 Requirements
+*Python ≥ 3.8
 
-Ultralytics YOLOv8
+*Ultralytics YOLOv8
 
-OpenCV
+*OpenCV
 
-PyTorch (with GPU support)
+*PyTorch (with GPU support)
 
-PyYAML
+*PyYAML
 
-Install dependencies:
+##Install dependencies:
 
-bash
-Copy
-Edit
-pip install ultralytics opencv-python pyyaml torch
-🏋️‍♂️ Training
+```bash
+pip install ultralytics opencv-python pyyaml torch```
+##🏋️‍♂️ Training
 Update yolo_params.yaml with your custom dataset paths and classes:
 
-yaml
-Copy
-Edit
+```yaml
 train: data/train/images
 val: data/val/images
 test: data/test
 nc: 3
-names: ['FireExtinguisher', 'ToolBox', 'OxygenTank']
+names: ['FireExtinguisher', 'ToolBox', 'OxygenTank']```
 Then run:
 
-bash
-Copy
-Edit
-python train.py
+```bash
+python train.py```
 You can modify hyperparameters like epochs, learning rate, batch size directly in the script or via CLI args.
 
-🧪 Inference on Test Images
-Make sure test: is defined in yolo_params.yaml.
 
-Then run:
-
-bash
-Copy
-Edit
-python infer_images.py
-This will save:
-
-Annotated images in predictions/images/
-
-Bounding boxes in YOLO format in predictions/labels/
-
-🎥 Live Detection with Webcam
+##🎥 Live Detection with Webcam
 Enable live detection using OpenCV:
 
-bash
-Copy
-Edit
-python live_detect.py
+```bash
+python live_detect.py``
 Make sure your webcam is connected and accessible.
 
-📊 Evaluation
+##📊 Evaluation
 Validation metrics are generated after inference using the model's .val() method on your test set.
 
-📌 Notes
+##📌 Notes
 Previous training results are stored in separate runs/detect/train* folders. You can delete old ones if storage is a concern.
 
 Use GPU where available for best performance (device=0 is used by default).
 
 AMP (mixed precision) is enabled by default for faster training.
 
-💬 License
+##💬 License
 This project is licensed under the MIT License. Feel free to use and modify it for personal or commercial projects.

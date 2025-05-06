@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionX: YOLOv8 Space-Station Object Detection</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Roboto:wght@300;400;500&display=swap');
+        
+        :root {
+            --primary: #0a192f;
+            --secondary: #172a45;
+            --accent: #64ffda;
+            --text: #e6f1ff;
+            --highlight: #ff5678;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        
+        #universe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 5s infinite ease-in-out;
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.5);
+            animation: rotate 100s infinite linear;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--accent); }
+            50% { box-shadow: 0 0 15px var(--accent), 0 0 25px var(--highlight); }
+            100% { box-shadow: 0 0 5px var(--accent); }
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        header {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        header.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .logo {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            position: relative;
+            color: transparent;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            -webkit-background-clip: text;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: slideUp 0.8s 0.5s ease-out forwards;
+        }
+        
+        .sponsored {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(23, 42, 69, 0.7);
+            border-left: 3px solid var(--highlight);
+            font-size: 0.9rem;
+            opacity: 0;
+            animation: fadeIn 0.8s 1.2s ease-out forwards;
+        }
+        
+        .sponsor-logo {
+            font-weight: 700;
+            color: var(--highlight);
+        }
+        
+        .dual-logo {
+            color: var(--accent);
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            border: none;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.8s 1s ease-out forwards;
+            margin-right: 1rem;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(100, 255, 218, 0.3);
+        }
+        
+        .cta-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+        
+        .cta-button:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .orbital-menu {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1.5rem;
+            z-index: 100;
+            opacity: 0;
+            animation: fadeIn 1s 1.5s ease-out forwards;
+        }
+        
+        .orbital-item {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .orbital-item::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            opacity: 0;
+            border-radius: 50%;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .orbital-item:hover::before {
+            opacity: 1;
+        }
+        
+        .orbital-item:hover {
+            transform: translateY(-10px);
+        }
+        
+        .orbital-item.active {
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            transform: scale(1.2);
+            animation: glow 2s infinite;
+        }
+        
+        .orbital-icon {
+            width: 25px;
+            height: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .orbital-tooltip {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: var(--secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .orbital-item:hover .orbital-tooltip {
+            transform: translateX(-50%) scale(1);
+        }
+        
+        section {
+            min-height: 100vh;
+            padding: 6rem 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .section-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: rgba(23, 42, 69, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid var(--accent);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .feature-card:hover::before {
+            opacity: 0.1;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .detection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .detection-card {
+            background: rgba(23, 42, 69, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-top: 4px solid var(--highlight);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .detection-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(255, 86, 120, 0.1);
+        }
+        
+        .detection-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            background: var(--secondary);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .detection-icon::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            opacity: 0.2;
+            border-radius: 15px;
+        }
+        
+        .detection-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight);
+        }
+        
+        .accuracy-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--secondary);
+            border-radius: 3px;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .accuracy-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--highlight));
+            width: 0;
+            transition: width 1.5s ease-out;
+        }
+        
+        .demo-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 4rem auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .demo-header {
+            background: var(--secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .demo-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .demo-control {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .demo-control:hover {
+            transform: scale(1.2);
+        }
+        
+        .demo-red { background: #ff5f56; }
+        .demo-yellow { background: #ffbd2e; }
+        .demo-green { background: #27c93f; }
+        
+        .demo-content {
+            background: var(--primary);
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .demo-image {
+            width: 100%;
+            height: 400px;
+            background: var(--secondary);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-image.paused {
+            opacity: 0.7;
+        }
+        
+        .demo-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        
+        .detection-box {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: opacity 0.3s ease;
+        }
+        
+        .detection-box.hidden {
+            opacity: 0;
+        }
+        
+        .detection-label {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+        }
+        
+        .oxygen-tank {
+            border-color: #3dc2ff;
+        }
+        
+        .oxygen-tank .detection-label {
+            background: #3dc2ff;
+        }
+        
+        .fire-extinguisher {
+            border-color: #ff3d7f;
+        }
+        
+        .fire-extinguisher .detection-label {
+            background: #ff3d7f;
+        }
+        
+        .toolbox {
+            border-color: #ffd23d;
+        }
+        
+        .toolbox .detection-label {
+            background: #ffd23d;
+        }
+        
+        .demo-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--secondary);
+            border-radius: 8px;
+            font-family: 'Roboto', monospace;
+            font-size: 0.9rem;
+            height: 150px;
+            overflow-y: auto;
+        }
+        
+        .status-line {
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .status-highlight {
+            color: var(--accent);
+        }
+        
+        .pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .team-card {
+            background: rgba(23, 42, 69, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
+        }
+        
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+        
+        .team-avatar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            opacity: 0.2;
+            border-radius: 50%;
+        }
+        
+        .team-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+        
+        .team-role {
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .team-social {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        
+        footer {
+            background: var(--secondary);
+            padding: 4rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        footer.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .footer-link {
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .footer-bottom {
+            margin-top: 3rem;
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(230, 241, 255, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatAnimation {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .orbital-menu {
+                gap: 1rem;
+            }
+            
+            .orbital-item {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .orbital-icon {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .feature-grid, .detection-grid, .team-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .orbital-menu {
+                gap: 0.5rem;
+            }
+            
+            .orbital-item {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .orbital-icon {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="universe"></div>
+    
+    <div class="logo">VisionX</div>
+    
+    <div class="orbital-menu">
+        <div class="orbital-item active">
+            <div class="orbital-tooltip">Home</div>
+            <svg class="orbital-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5zM12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+            </svg>
+        </div>
+        <div class="orbital-item">
+            <div class="orbital-tooltip">Features</div>
+            <svg class="orbital-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/>
+            </svg>
+        </div>
+        <div class="orbital-item">
+            <div class="orbital-tooltip">Detection</div>
+            <svg class="orbital-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                <path d="M7 9h2v6H7zm8 0h2v6h-2z"/>
+            </svg>
+        </div>
+        <div class="orbital-item">
+            <div class="orbital-tooltip">Demo</div>
+            <svg class="orbital-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM5 10h14v2H5zm0-4h14v2H5zm0 8h14v2H5z"/>
+            </svg>
+        </div>
+        <div class="orbital-item">
+            <div class="orbital-tooltip">Team</div>
+            <svg class="orbital-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c.4-.06.74-.1 1.13-.1c.99 0 1.93.21 2.78.58c.74.32 1.46 1.04 1.46 1.85V18h-4.5v-1.61c0-.83-.23-1.61-.63-2.29zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/>
+            </svg>
+        </div>
+    </div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>VisionX: YOLOv8 Space-Station Object Detection</h1>
+                <p class="subtitle">Advanced AI-powered computer vision system for critical equipment detection in space environments.</p>
+                <button class="cta-button">Explore the System</button>
+                <div class="sponsored">
+                    Sponsored by <span class="sponsor-logo">FALCON</span> & <span class="dual-logo">DUALITY AI</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <section id="features">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">System Features</h2>
+                <p>VisionX leverages the state-of-the-art YOLOv8 algorithm to deliver unprecedented accuracy and speed in space-station equipment detection.</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <h3 class="feature-title">Real-time Detection</h3>
+                        <p>Process high-definition camera feeds with minimal latency, providing instantaneous feedback on equipment locations.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <h3 class="feature-title">Critical Alert System</h3>
+                        <p>Immediate notifications when safety equipment is misplaced or missing from designated areas, ensuring crew safety.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                        <h3 class="feature-title">Adaptive Learning</h3>
+                        <p>The system continuously improves detection accuracy through machine learning, adapting to new equipment and environmental conditions.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        <h3 class="feature-title">Multi-Camera Integration</h3>
+                        <p>Seamlessly integrates multiple camera feeds to provide comprehensive coverage of the entire space station environment.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                        </svg>
+                        <h3 class="feature-title">Low Resource Consumption</h3>
+                        <p>Optimized for space environments, the system requires minimal computational resources while maintaining high performance.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <h3 class="feature-title">Secure Operations</h3>
+                        <p>End-to-end encryption and secure data handling ensure sensitive information remains protected at all times.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="detection">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">Detection Capabilities</h2>
+                <p>VisionX can identify and track a wide range of critical equipment with exceptional accuracy in various lighting conditions.</p>
+                
+                <div class="detection-grid">
+                    <div class="detection-card">
+                        <div class="detection-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </div>
+                        <h3 class="detection-title">Oxygen Tanks</h3>
+                        <p>Instantly locate and verify the presence of oxygen tanks, ensuring they're properly stored and accessible in emergencies.</p>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill" style="width: 98%;"></div>
+                        </div>
+                        <p><small>Detection accuracy: 98%</small></p>
+                    </div>
+                    
+                    <div class="detection-card">
+                        <div class="detection-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="detection-title">Fire Extinguishers</h3>
+                        <p>Monitor fire safety equipment placement and status, with alerts if extinguishers are removed from designated areas.</p>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill" style="width: 96%;"></div>
+                        </div>
+                        <p><small>Detection accuracy: 96%</small></p>
+                    </div>
+                    
+                    <div class="detection-card">
+                        <div class="detection-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="3" y1="15" x2="21" y2="15"></line>
+                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                <line x1="15" y1="3" x2="15" y2="21"></line>
+                            </svg>
+                        </div>
+                        <h3 class="detection-title">Toolboxes</h3>
+                        <p>Track essential maintenance equipment and tools, ensuring they're properly stored and accounted for at all times.</p>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill" style="width: 95%;"></div>
+                        </div>
+                        <p><small>Detection accuracy: 95%</small></p>
+                    </div>
+                    
+                    <div class="detection-card">
+                        <div class="detection-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="detection-title">Emergency Lighting</h3>
+                        <p>Verify the operational status of emergency lighting systems, ensuring they're functioning properly in all conditions.</p>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill" style="width: 94%;"></div>
+                        </div>
+                        <p><small>Detection accuracy: 94%</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="demo">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">Live Demo</h2>
+                <p>See VisionX in action with our interactive demonstration of real-time object detection in a simulated space environment.</p>
+                
+                <div class="demo-container">
+                    <div class="demo-header">
+                        <div class="demo-title">VisionX Terminal</div>
+                        <div class="demo-controls">
+                            <div class="demo-control demo-red" title="Reset"></div>
+                            <div class="demo-control demo-yellow" title="Toggle Detections"></div>
+                            <div class="demo-control demo-green" title="Pause/Play"></div>
+                        </div>
+                    </div>
+                    <div class="demo-content">
+                        <div class="demo-image">
+                            <div class="demo-image-placeholder">SPACE STATION CAMERA FEED</div>
+                            <div class="detection-box oxygen-tank" style="top: 30%; left: 20%; width: 80px; height: 120px;">
+                                <div class="detection-label">Oxygen Tank</div>
+                            </div>
+                            <div class="detection-box fire-extinguisher" style="top: 45%; left: 60%; width: 50px; height: 100px;">
+                                <div class="detection-label">Fire Extinguisher</div>
+                            </div>
+                            <div class="detection-box toolbox" style="top: 70%; left: 40%; width: 100px; height: 60px;">
+                                <div class="detection-label">Toolbox</div>
+                            </div>
+                        </div>
+                        <div class="demo-status">
+                            <div class="status-line"><span class="pulse"></span>System initialized... <span class="status-highlight">OK</span></div>
+                            <div class="status-line">Loading YOLOv8 model... <span class="status-highlight">COMPLETE</span></div>
+                            <div class="status-line">Camera feed connected... <span class="status-highlight">OK</span></div>
+                            <div class="status-line">Scanning environment... <span class="status-highlight">IN PROGRESS</span></div>
+                            <div class="status-line">Detected: <span class="status-highlight">Oxygen Tank</span> (confidence: 98.2%)</div>
+                            <div class="status-line">Detected: <span class="status-highlight">Fire Extinguisher</span> (confidence: 97.5%)</div>
+                            <div class="status-line">Detected: <span class="status-highlight">Toolbox</span> (confidence: 95.8%)</div>
+                            <div class="status-line">All critical equipment accounted for... <span class="status-highlight">VERIFIED</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="team">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">Our Team</h2>
+                <p>Meet the brilliant minds behind VisionX's revolutionary computer vision technology.</p>
+                
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <img src="https://media-hosting.imagekit.io/d52c614d0fc0455d/piyush.png?Expires=1841134998&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=FWZ76r9WYXt4MSfA0NqGOD0I5vo2kr7PuCfdy0wtBMaQV1Ga~MUV00xQZLK-l~5WEE6GoKhJIhW~-CYZ~8uDIJn5taYPgRjVzFxMRVMjJb~5w1TygZNO~FgrLVFPgI3j6oQrzg08FEfaWtLz2Xu2osxYEREiLsr8fmY7bu3z3pFQlCpw5zm6UrTnCyH~GiPnoBTtnjdz41hyhLvnr3w6jkgrDy-7I8tjc3SS6LEue7viex4SkwxZJzP0sYWTRQOGt~jKoFqIe-GGl1kvoxffnqPS7XdUvCf-ApM2oxvbLfXbwiXEkG749E9rlUNW2Q3KM9a~kKTfF1EGCv59UfAxNw__" alt="Piyush Kumar avatar">
+                        </div>
+                        <h3 class="team-name">Piyush Kumar</h3>
+                        <div class="team-role">AI Developer</div>
+                        <p>Passionate about building impactful AI tools with expertise in computer vision and intelligent systems.</p>
+                        <div class="team-social">
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                    <rect x="2" y="9" width="4" height="12"></rect>
+                                    <circle cx="4" cy="4" r="2"></circle>
+                                </svg>
+                            </div>
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <img src="https://media-hosting.imagekit.io/70a742683ad843fb/nakul.jpeg?Expires=1841134998&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=GpIghzcGrpnF0W34ZTCPoAK3NfOGl861ON557G3T2L59slx5CXMHg6P77ILCbYuPkag7mhBlyI~sJFQhDhz7r9CVNuyOTXuz0oYUDOUJF2abCT8tlmPSmOk4OJULhCtfFOpOFnR9vthS7~5AwDsF-dGCAzvyERJzzb8j4z~ZdyRMTNc5ruLxYQbsyy29W4hJhKbLlFQ22I6q~p89SkDiLd2Jy-vbmajfKA~3puH5Zhu3C6yplfmOe21KvwNd4YO6MAbsUMSgExzFYB~fuovjRce2wHkbQB05IksEn~87gpRbe06SZSIX6dweqntEgnCQF0PTX4lnit8U9YEHEJTX8Q__" alt="Nakul Verma avatar">
+                        </div>
+                        <h3 class="team-name">Nakul Verma</h3>
+                        <div class="team-role">AI Researcher</div>
+                        <p>Focused on deep learning research and model optimization for real-time applications.</p>
+                        <div class="team-social">
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                    <rect x="2" y="9" width="4" height="12"></rect>
+                                    <circle cx="4" cy="4" r="2"></circle>
+                                </svg>
+                            </div>
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <img src="https://media-hosting.imagekit.io/e34621b5e9254496/om.jpeg?Expires=1841134998&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=IQunDwXhiG44rep95Mv57KY-E16Fy5~1-WUc4cau6FIL~YbYLO32GlCWWIwGn-zw8GmWcITaIphOaug3WI~UryyzxBLOSxbT9L~wXD0ARYUR8YumXHpEq5Dx1qTnJLiXAxg3O2aLlr7xJYtZpg41Wp9UCVu0-G-iT4l9v6Ts6HXtuibndWoCcEomLnq4tKQQnEt8T7t7SNBsAaXHEh3leaJW~N~hrNvw7lDo1PM8cIUmn-07pALTdV8bcVQCgCvLpatfx6x1x0nXoFiKQIrBMf7nDOft3rvyxA46lUccBLeUXF-g4QbxiAflWBsf0WHVtI9RRqqLDb~2dFumcJepHw__" alt="Om Kumar avatar">
+                        </div>
+                        <h3 class="team-name">Om Kumar</h3>
+                        <div class="team-role">ML Engineer</div>
+                        <p>Skilled in training scalable ML models and integrating them into production environments.</p>
+                        <div class="team-social">
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                    <rect x Daf="2" y="9" width="4" height="12"></rect>
+                                    <circle cx="4" cy="4" r="2"></circle>
+                                </svg>
+                            </div>
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-card">
+                        <div class="team-avatar">
+                            <img src="https://media-hosting.imagekit.io/62bd23d673be4a1a/kartik.jpeg?Expires=1841134998&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=hLPehIWDB6fLZsuVHjKzfNUZk21JM4UL3xz0bWQbrYJCCvEtACtAMm4fKYXAkLdXn3g0xBcHKXQ5PR3uJpMPToySzaBILpq8OVT16B1phRC9VhUhhGXX6jSpwg-2AstfH4lVuoC~MGM97MFYYrTvGtRIW~SRrLiIZ02RML~V4JRaIEmqDpJHQNUQkVRxBg6yNdVP1A5eAWGad52h~Hcevr8xRSz5v87AMK0VZFQqSp9SWe9tyENRo5elboiQ4AO57KbKTXn~O9hqiMsw0DeSn8CqKfOGg5E~Hftazn0u87OISZBCEfmogin71FQth02JF0d0M5z-BYLE4cxMoej-vA__" alt="Kartik Yadav avatar">
+                        </div>
+                        <h3 class="team-name">Kartik Yadav</h3>
+                        <div class="team-role">Frontend Developer</div>
+                        <p>Focused on building responsive, user-friendly UIs with modern web technologies.</p>
+                        <div class="team-social">
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.493 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z"/>
+                                </svg>
+                            </div>
+                            <div class="social-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3, prioritized3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">VisionX</div>
+                    <p>Advanced AI-powered computer vision system<br>for space environments.</p>
+                    <div class="footer-social">
+                        <div class="social-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.493 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Navigation</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Home</a>
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#detection" class="footer-link">Detection</a>
+                        <a href="#demo" class="footer-link">Demo</a>
+                        <a href="#team" class="footer-link">Team</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Resources</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Documentation</a>
+                        <a href="#" class="footer-link">API Reference</a>
+                        <a href="#" class="footer-link">Research Papers</a>
+                        <a href="#" class="footer-link">Case Studies</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Contact</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><span class="__cf_email__" data-cfemail="0f666169604f79667c66606177217c7f6e6c6a">[email&#160;protected]</span></a>
+                        <a href="#" class="footer-link">Support</a>
+                        <a href="#" class="footer-link">Careers</a>
+                        <a href="#" class="footer-link">Media Inquiries</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 VisionX. All rights reserved. A joint project of FALCON & DUALITY AI.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>
+        // Create stars
+        const universe = document.getElementById('universe');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = `${Math.random() * 3}px`;
+            star.style.height = star.style.width;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            star.dataset.parallax = Math.random() * 0.5 + 0.1;
+            universe.appendChild(star);
+        }
+        
+        // Create planets
+        for (let i = 0; i < 3; i++) {
+            const planet = document.createElement('div');
+            planet.className = 'planet';
+            planet.style.width = `${Math.random() * 100 + 50}px`;
+            planet.style.height = planet.style.width;
+            planet.style.left = `${Math.random() * 100}%`;
+            planet.style.top = `${Math.random() * 100}%`;
+            planet.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            planet.style.opacity = '0.2';
+            planet.style.animationDelay = `${Math.random() * 5}s`;
+            planet.dataset.parallax = Math.random() * 0.3 + 0.1;
+            universe.appendChild(planet);
+        }
+        
+        // Parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            document.querySelectorAll('.star, .planet').forEach(el => {
+                const speed = parseFloat(el.dataset.parallax);
+                el.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+        });
+        
+        // Feature cards animation
+        const featureCards = document.querySelectorAll('.feature-card');
+        const detectionCards = document.querySelectorAll('.detection-card');
+        const teamCards = document.querySelectorAll('.team-card');
+        const demoContainer = document.querySelector('.demo-container');
+        
+        // Intersection Observer for card animations
+        const cardObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    
+                    const accuracyFill = entry.target.querySelector('.accuracy-fill');
+                    if (accuracyFill) {
+                        accuracyFill.style.width = accuracyFill.style.width;
+                    }
+                    
+                    cardObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        featureCards.forEach(card => cardObserver.observe(card));
+        detectionCards.forEach(card => cardObserver.observe(card));
+        teamCards.forEach(card => cardObserver.observe(card));
+        if (demoContainer) cardObserver.observe(demoContainer);
+        
+        // Enhanced Section transition animations
+        const sections = document.querySelectorAll('header, section, footer');
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    sectionObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
+        
+        sections.forEach(section => sectionObserver.observe(section));
+        
+        // Orbital menu navigation and section highlighting
+        const orbitalItems = document.querySelectorAll('.orbital-item');
+        
+        const sectionMap = {
+            '': 'Home',
+            'features': 'Features',
+            'detection': 'Detection',
+            'demo': 'Demo',
+            'team': 'Team'
+        };
+        
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id || '';
+                    const activeTooltip = sectionMap[sectionId];
+                    
+                    orbitalItems.forEach(item => {
+                        item.classList.remove('active');
+                        const tooltip = item.querySelector('.orbital-tooltip').textContent;
+                        if (tooltip === activeTooltip) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.3, rootMargin: '-20% 0px -20% 0px' });
+        
+        sections.forEach(section => navObserver.observe(section));
+        
+        orbitalItems.forEach(item => {
+            item.addEventListener('click', () => {
+                orbitalItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                const tooltip = item.querySelector('.orbital-tooltip').textContent;
+                if (tooltip === 'Home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const section = document.getElementById(tooltip.toLowerCase());
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+        
+        // CTA button navigation to explore page
+        const ctaButtons = document.querySelectorAll('.cta-button');
+        ctaButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                window.location.href = '/explore';
+            });
+        });
+        
+        // Demo controls functionality
+        const demoImage = document.querySelector('.demo-image');
+        const detectionBoxes = document.querySelectorAll('.detection-box');
+        const demoStatus = document.querySelector('.demo-status');
+        const resetButton = document.querySelector('.demo-red');
+        const toggleButton = document.querySelector('.demo-yellow');
+        const playPauseButton = document.querySelector('.demo-green');
+        
+        let isPaused = false;
+        let showDetections = true;
+        
+        resetButton.addEventListener('click', () => {
+            demoStatus.innerHTML = `
+                <div class="status-line"><span class="pulse"></span>System initialized... <span class="status-highlight">OK</span></div>
+                <div class="status-line">Loading YOLOv8 model... <span class="status-highlight">COMPLETE</span></div>
+                <div class="status-line">Camera feed connected... <span class="status-highlight">OK</span></div>
+                <div class="status-line">Scanning environment... <span class="status-highlight">IN PROGRESS</span></div>
+            `;
+            isPaused = false;
+            showDetections = true;
+            demoImage.classList.remove('paused');
+            detectionBoxes.forEach(box => box.classList.remove('hidden'));
+            startTerminalSimulation();
+        });
+        
+        toggleButton.addEventListener('click', () => {
+            showDetections = !showDetections;
+            detectionBoxes.forEach(box => {
+                box.classList.toggle('hidden', !showDetections);
+            });
+            const statusLine = document.createElement('div');
+            statusLine.className = 'status-line';
+            statusLine.innerHTML = `Detections ${showDetections ? 'enabled' : 'disabled'}... <span class="status-highlight">${showDetections ? 'ON' : 'OFF'}</span>`;
+            demoStatus.appendChild(statusLine);
+            demoStatus.scrollTop = demoStatus.scrollHeight;
+        });
+        
+        playPauseButton.addEventListener('click', () => {
+            isPaused = !isPaused;
+            demoImage.classList.toggle('paused', isPaused);
+            const statusLine = document.createElement('div');
+            statusLine.className = 'status-line';
+            statusLine.innerHTML = `System ${isPaused ? 'paused' : 'resumed'}... <span class="status-highlight">${isPaused ? 'PAUSED' : 'RUNNING'}</span>`;
+            demoStatus.appendChild(statusLine);
+            demoStatus.scrollTop = demoStatus.scrollHeight;
+        });
+        
+        let terminalLines = [
+            "Running system diagnostics...",
+            "Checking camera connections...",
+            "Analyzing camera feed...",
+            "Detected: Emergency Exit Sign (confidence: 93.7%)",
+            "Detected: Medical Kit (confidence: 92.4%)",
+            "Alert: Fire Extinguisher moved from designated area",
+            "Notifying station personnel...",
+            "Continuing scan..."
+        ];
+        
+        let lineIndex = 0;
+        let terminalInterval = null;
+        
+        function addTerminalLine() {
+            if (isPaused) return;
+            if (lineIndex < terminalLines.length) {
+                const line = document.createElement('div');
+                line.className = 'status-line';
+                line.innerHTML = `<span class="pulse"></span>${terminalLines[lineIndex]}`;
+                demoStatus.appendChild(line);
+                demoStatus.scrollTop = demoStatus.scrollHeight;
+                lineIndex++;
+            } else {
+                lineIndex = 0;
+                terminalLines = terminalLines.map(line => {
+                    if (line.includes('confidence')) {
+                        const confidence = (Math.random() * 5 + 90).toFixed(1);
+                        return line.replace(/\d+\.\d%/, `${confidence}%`);
+                    }
+                    return line;
+                });
+                demoStatus.innerHTML = `
+                    <div class="status-line"><span class="pulse"></span>System initialized... <span class="status-highlight">OK</span></div>
+                    <div class="status-line">Loading YOLOv8 model... <span class="status-highlight">COMPLETE</span></div>
+                    <div class="status-line">Camera feed connected... <span class="status-highlight">OK</span></div>
+                    <div class="status-line">Scanning environment... <span class="status-highlight">IN PROGRESS</span></div>
+                `;
+            }
+        }
+        
+        function startTerminalSimulation() {
+            if (terminalInterval) clearInterval(terminalInterval);
+            lineIndex = 4;
+            terminalInterval = setInterval(addTerminalLine, 1500 + Math.random() * 1000);
+        }
+        
+        startTerminalSimulation();
+    </script>
+</body>
+</html>

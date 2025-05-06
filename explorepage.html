@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionX: Explore the System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Roboto:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary: #0a192f;
+            --secondary: #172a45;
+            --accent: #64ffda;
+            --text: #e6f1ff;
+            --highlight: #ff5678;
+            --glow: rgba(100, 255, 218, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        
+        #universe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 4s infinite ease-in-out;
+            will-change: opacity;
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.5);
+            animation: rotate 80s infinite linear;
+            will-change: transform;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--accent); }
+            50% { box-shadow: 0 0 20px var(--accent), 0 0 30px var(--highlight); }
+            100% { box-shadow: 0 0 5px var(--accent); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--glow);
+        }
+        
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(to bottom, rgba(10, 25, 47, 0.9), transparent);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+            text-shadow: 0 0 5px var(--glow);
+        }
+        
+        header {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        header.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .header-content {
+            text-align: center;
+            max-width: 900px;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            color: transparent;
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            -webkit-background-clip: text;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: slideUp 0.8s 0.5s ease-out forwards;
+        }
+        
+        section {
+            min-height: 100vh;
+            padding: 8rem 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 10px var(--glow);
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        .upload-container {
+            background: linear-gradient(135deg, rgba(23, 42, 69, 0.7), rgba(10, 25, 47, 0.7));
+            border-radius: 20px;
+            padding: 4rem;
+            text-align: center;
+            margin: 3rem auto;
+            max-width: 900px;
+            border-left: 5px solid var(--accent);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .upload-container:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 50px rgba(100, 255, 218, 0.2);
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .upload-button {
+            background: linear-gradient(45deg, var(--accent), var(--highlight));
+            border: none;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            box-shadow: 0 5px 15px var(--glow);
+        }
+        
+        .upload-button:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(100, 255, 218, 0.4);
+            animation: glow 1.5s infinite;
+        }
+        
+        .upload-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+        
+        .upload-button:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .upload-button:disabled {
+            background: linear-gradient(45deg, #4a6a7d, #6b3e4d);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .logo-icon {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        
+        .progress-indicator {
+            display: none;
+            margin: 2rem auto;
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--accent);
+            border-top: 5px solid var(--highlight);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .preview-container {
+            margin: 3rem auto;
+            max-width: 900px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: var(--secondary);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            display: block;
+            background: var(--primary);
+        }
+        
+        .preview-placeholder {
+            width: 100%;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            background: var(--primary);
+            text-shadow: 0 0 10px var(--glow);
+        }
+        
+        .results-container {
+            display: none;
+            margin: 3rem auto;
+            max-width: 900px;
+            transition: all 0.3s ease;
+        }
+        
+        .results-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .results-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--glow);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, rgba(23, 42, 69, 0.7), rgba(10, 25, 47, 0.7));
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--highlight);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(100, 255, 218, 0.2);
+        }
+        
+        .result-card .pulse {
+            margin-right: 10px;
+        }
+        
+        .result-card p {
+            font-size: 1rem;
+            font-weight: 400;
+        }
+        
+        .video-container {
+            display: none;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            background: var(--primary);
+            text-shadow: 0 0 10px var(--glow);
+        }
+        
+        .opencv-support {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .support-card {
+            background: linear-gradient(135deg, rgba(23, 42, 69, 0.7), rgba(10, 25, 47, 0.7));
+            border-radius: 15px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid var(--highlight);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .support-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 30px rgba(255, 86, 120, 0.2);
+        }
+        
+        .support-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--highlight);
+            text-shadow: 0 0 5px var(--glow);
+        }
+        
+        .pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 1024px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .section-title {
+                font-size: 2.8rem;
+            }
+            
+            .upload-container {
+                padding: 3rem;
+            }
+            
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .upload-container {
+                padding: 2rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .logo {
+                font-size: 1.4rem;
+            }
+            
+            .nav-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="universe"></div>
+    
+    <nav class="nav-bar">
+        <div class="logo">VisionX</div>
+        <div class="nav-links">
+            <a href="#upload">Upload & Analyze</a>
+            <a href="#opencv">OpenCV Support</a>
+        </div>
+    </nav>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Explore VisionX</h1>
+                <p class="subtitle">Upload images or access live video feeds to experience YOLOv8-powered object detection in a space station environment.</p>
+            </div>
+        </div>
+    </header>
+    
+    <section id="upload">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">Upload & Analyze</h2>
+                <p>Test VisionX by uploading an image or accessing a live video feed to detect critical equipment using our YOLOv8 model.</p>
+                
+                <div class="upload-container">
+                    <div class="button-grid">
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <button class="upload-button" id="uploadImageButton" onclick="document.getElementById('imageUpload').click()">
+                            <span class="logo-icon">VisionX</span> Upload Image
+                        </button>
+                        <button class="upload-button" id="analyzeButton" disabled>Analyze Image</button>
+                        <button class="upload-button" id="liveVideoButton">Access Live Video</button>
+                        <button class="upload-button" id="stopVideoButton" style="display: none;">Stop Live Video</button>
+                    </div>
+                    <div class="progress-indicator" id="progressIndicator"></div>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-placeholder" id="previewPlaceholder">UPLOADED IMAGE PREVIEW</div>
+                    <img id="previewImage" class="preview-image" src="" alt="Preview" style="display: none;">
+                </div>
+                
+                <div class="results-container" id="resultsContainer">
+                    <h3 class="results-title">Detection Results</h3>
+                    <div class="results-grid" id="resultsList"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="opencv">
+        <div class="container">
+            <div class="section-content">
+                <h2 class="section-title">OpenCV Support</h2>
+                <p>VisionX integrates OpenCV for enhanced image processing capabilities, ensuring robust performance in space environments.</p>
+                
+                <div class="opencv-support">
+                    <div class="support-card">
+                        <h3 class="support-title">Image Preprocessing</h3>
+                        <p>OpenCV provides advanced image preprocessing techniques like noise reduction and contrast enhancement for better detection accuracy.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3 class="support-title">Real-time Processing</h3>
+                        <p>Leverages OpenCV's optimized algorithms to process camera feeds in real-time with minimal latency.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3 class="support-title">Feature Detection</h3>
+                        <p>Utilizes OpenCV for feature matching and object tracking to complement YOLOv8's detection capabilities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // Create stars
+        const universe = document.getElementById('universe');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = `${Math.random() * 2.5}px`;
+            star.style.height = star.style.width;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 4}s`;
+            star.dataset.parallax = Math.random() * 0.4 + 0.1;
+            universe.appendChild(star);
+        }
+        
+        // Create planets
+        for (let i = 0; i < 2; i++) {
+            const planet = document.createElement('div');
+            planet.className = 'planet';
+            planet.style.width = `${Math.random() * 80 + 40}px`;
+            planet.style.height = planet.style.width;
+            planet.style.left = `${Math.random() * 100}%`;
+            planet.style.top = `${Math.random() * 100}%`;
+            planet.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            planet.style.opacity = '0.15';
+            planet.style.animationDelay = `${Math.random() * 4}s`;
+            planet.dataset.parallax = Math.random() * 0.2 + 0.1;
+            universe.appendChild(planet);
+        }
+        
+        // Parallax effect
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            document.querySelectorAll('.star, .planet').forEach(el => {
+                const speed = parseFloat(el.dataset.parallax);
+                el.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+        });
+        
+        // Section animations
+        const sections = document.querySelectorAll('header, section');
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    sectionObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
+        
+        sections.forEach(section => sectionObserver.observe(section));
+        
+        // Support card and results animations
+        const animatableElements = document.querySelectorAll('.support-card, .results-container');
+        const cardObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    entry.target.classList.add('visible');
+                    cardObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        animatableElements.forEach(el => cardObserver.observe(el));
+        
+        // Image upload and preview
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadImageButton = document.getElementById('uploadImageButton');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const liveVideoButton = document.getElementById('liveVideoButton');
+        const stopVideoButton = document.getElementById('stopVideoButton');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const previewImage = document.getElementById('previewImage');
+        const progressIndicator = document.getElementById('progressIndicator');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsList = document.getElementById('resultsList');
+        
+        let uploadedFilename = null;
+        let isVideoMode = false;
+        
+        imageUpload.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                progressIndicator.style.display = 'block';
+                uploadImageButton.disabled = true;
+                analyzeButton.disabled = true;
+                liveVideoButton.disabled = true;
+                stopVideoButton.style.display = 'none';
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                try {
+                    const response = await fetch('/upload_image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        uploadedFilename = result.filename;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewPlaceholder.style.display = 'none';
+                            previewImage.style.display = 'block';
+                            previewImage.src = e.target.result;
+                            previewContainer.classList.remove('video-container');
+                            resultsContainer.style.display = 'none';
+                            resultsList.innerHTML = '';
+                            isVideoMode = false;
+                            progressIndicator.style.display = 'none';
+                            uploadImageButton.disabled = false;
+                            analyzeButton.disabled = false;
+                            liveVideoButton.disabled = false;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        console.error('Upload failed:', result.error);
+                        progressIndicator.style.display = 'none';
+                        uploadImageButton.disabled = false;
+                        analyzeButton.disabled = true;
+                        liveVideoButton.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    progressIndicator.style.display = 'none';
+                    uploadImageButton.disabled = false;
+                    analyzeButton.disabled = true;
+                    liveVideoButton.disabled = false;
+                }
+            }
+        });
+        
+        analyzeButton.addEventListener('click', async () => {
+            if (!uploadedFilename || isVideoMode) return;
+            
+            progressIndicator.style.display = 'block';
+            uploadImageButton.disabled = true;
+            analyzeButton.disabled = true;
+            liveVideoButton.disabled = true;
+            
+            try {
+                const response = await fetch(`/analyze_image/${uploadedFilename}`);
+                const result = await response.json();
+                if (response.ok) {
+                    // Display the backend-generated image with bounding boxes
+                    previewImage.src = result.image;
+                    // Display detection results
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = result.detections.length > 0
+                        ? result.detections.map(d => `
+                            <div class="result-card">
+                                <p><span class="pulse"></span>Detected: ${d.label}</p>
+                                <p>Confidence: ${(d.confidence * 100).toFixed(1)}%</p>
+                            </div>
+                        `).join('')
+                        : '<div class="result-card"><p>No objects detected</p></div>';
+                } else {
+                    console.error('Analysis failed:', result.error);
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error analyzing image</p></div>';
+                }
+            } catch (error) {
+                console.error('Error analyzing image:', error);
+                resultsContainer.style.display = 'block';
+                resultsList.innerHTML = '<div class="result-card"><p>Error analyzing image</p></div>';
+            } finally {
+                progressIndicator.style.display = 'none';
+                uploadImageButton.disabled = false;
+                analyzeButton.disabled = false;
+                liveVideoButton.disabled = false;
+            }
+        });
+        
+        // Live video feed toggle
+        liveVideoButton.addEventListener('click', async () => {
+            if (isVideoMode) return;
+            
+            progressIndicator.style.display = 'block';
+            uploadImageButton.disabled = true;
+            analyzeButton.disabled = true;
+            liveVideoButton.disabled = true;
+            
+            try {
+                const response = await fetch('/start_video', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    isVideoMode = true;
+                    previewContainer.classList.add('video-container');
+                    previewPlaceholder.style.display = 'none';
+                    previewImage.style.display = 'block';
+                    previewImage.src = '/video_feed';
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Live video streaming...</p></div>';
+                    analyzeButton.disabled = true;
+                    liveVideoButton.style.display = 'none';
+                    stopVideoButton.style.display = 'block';
+                } else {
+                    console.error('Failed to start video:', result.error);
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error starting video</p></div>';
+                }
+            } catch (error) {
+                console.error('Error starting video:', error);
+                resultsContainer.style.display = 'block';
+                resultsList.innerHTML = '<div class="result-card"><p>Error starting video</p></div>';
+            } finally {
+                progressIndicator.style.display = 'none';
+                uploadImageButton.disabled = false;
+                liveVideoButton.disabled = false;
+            }
+        });
+        
+        stopVideoButton.addEventListener('click', async () => {
+            if (!isVideoMode) return;
+            
+            progressIndicator.style.display = 'block';
+            uploadImageButton.disabled = true;
+            analyzeButton.disabled = true;
+            stopVideoButton.disabled = true;
+            
+            try {
+                const response = await fetch('/stop_video', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    isVideoMode = false;
+                    previewImage.src = '';
+                    previewPlaceholder.style.display = 'block';
+                    previewImage.style.display = 'none';
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Video stopped</p></div>';
+                    analyzeButton.disabled = false;
+                    liveVideoButton.style.display = 'block';
+                    stopVideoButton.style.display = 'none';
+                } else {
+                    console.error('Failed to stop video:', result.error);
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error stopping video</p></div>';
+                }
+            } catch (error) {
+                console.error('Error stopping video:', error);
+                resultsContainer.style.display = 'block';
+                resultsList.innerHTML = '<div class="result-card"><p>Error stopping video</p></div>';
+            } finally {
+                progressIndicator.style.display = 'none';
+                uploadImageButton.disabled = false;
+                analyzeButton.disabled = false;
+                stopVideoButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

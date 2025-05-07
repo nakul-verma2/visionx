@@ -12,8 +12,7 @@ from glob import glob
 import logging
 
 app = Flask(__name__)
-CORS(app)  
-
+CORS(app)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -26,40 +25,67 @@ frame = None
 lock = threading.Lock()
 is_streaming = False
 
-
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'Uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def initialize_webcam():
+    """Attempt to initialize webcam with retry logic."""
+    global video_capture
+    for index in range(3):  # Try indices 0, 1, 2
+        video_capture = cv2.VideoCapture(index)
+        if video_capture.isOpened():
+            logger.debug(f"Webcam opened successfully on index {index}")
+            return True
+        video_capture.release()
+        logger.debug(f"Failed to open webcam on index {index}")
+        time.sleep(0.5)
+    logger.error("Could not open any webcam")
+    return False
+
 def generate_frames():
     """Generate frames for live video streaming with YOLOv8 detection."""
-    global frame, is_streaming
+    global frame, is_streaming, video_capture
+    logger.debug("Starting frame generation")
     while is_streaming:
+        if video_capture is None or not video_capture.isOpened():
+            logger.error("Video capture not initialized or failed")
+            time.sleep(0.1)
+            continue
+
         ret, current_frame = video_capture.read()
         if not ret:
+            logger.error("Failed to capture frame")
+            time.sleep(0.1)
             continue
 
         # Run YOLOv8 inference
-        results = model(current_frame)
-        for result in results:
-            boxes = result.boxes
-            for box in boxes:
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                conf = box.conf[0]
-                cls = int(box.cls[0])
-                label = f"{model.names[cls]} {conf:.2f}"
-                cv2.rectangle(current_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(current_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        try:
+            results = model(current_frame)
+            for result in results:
+                boxes = result.boxes
+                for box in boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    conf = box.conf[0]
+                    cls = int(box.cls[0])
+                    label = f"{model.names[cls]} {conf:.2f}"
+                    cv2.rectangle(current_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    cv2.putText(current_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        except Exception as e:
+            logger.error(f"YOLOv8 inference failed: {str(e)}")
 
         # Encode frame to JPEG
         ret, buffer = cv2.imencode('.jpg', current_frame)
         if ret:
             with lock:
                 frame = buffer.tobytes()
-
+            logger.debug("Frame generated")
+        else:
+            logger.error("Failed to encode frame")
         time.sleep(0.03)  # Control frame rate (~30 FPS)
+    logger.debug("Frame generation stopped")
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
@@ -79,7 +105,7 @@ def upload_image():
         return jsonify({'message': 'Image uploaded', 'filename': filename}), 200
 
 @app.route('/analyze_image/<filename>', methods=['GET'])
-def analyze_image(filename):
+def analyze_image():
     """Analyze uploaded image using YOLOv8 and return the processed image."""
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if not os.path.exists(file_path):
@@ -88,7 +114,7 @@ def analyze_image(filename):
 
     # Read and process image
     img = cv2.imread(file_path)
-    results = model.predict(source=img, save=False, conf=0.5)  # Confidence threshold to filter detections
+    results = model.predict(source=img, save=False, conf=0.5)
 
     detections = []
     for result in results:
@@ -105,7 +131,7 @@ def analyze_image(filename):
                 'class': label.lower().replace(' ', '-')
             })
 
-        # Draw detections on image (similar to analyse.py)
+        # Draw detections on image
         img_annotated = result.plot()
         img_bgr = cv2.cvtColor(img_annotated, cv2.COLOR_RGB2BGR)
 
@@ -140,11 +166,10 @@ def start_video():
     """Start live video feed."""
     global video_capture, video_thread, is_streaming
     if is_streaming:
+        logger.debug("Video already streaming")
         return jsonify({'message': 'Video already streaming'}), 200
 
-    video_capture = cv2.VideoCapture(0)
-    if not video_capture.isOpened():
-        logger.error("Could not open webcam")
+    if not initialize_webcam():
         return jsonify({'error': 'Could not open webcam'}), 500
 
     is_streaming = True
@@ -157,26 +182,33 @@ def start_video():
 @app.route('/stop_video', methods=['POST'])
 def stop_video():
     """Stop live video feed."""
-    global video_capture, is_streaming
+    global video_capture, is_streaming, video_thread
     if not is_streaming:
+        logger.debug("No video streaming")
         return jsonify({'message': 'No video streaming'}), 200
 
     is_streaming = False
     if video_thread:
         video_thread.join()
+        video_thread = None
     if video_capture:
         video_capture.release()
+        video_capture = None
+    frame = None
     logger.debug("Video streaming stopped")
     return jsonify({'message': 'Video streaming stopped'}), 200
 
 @app.route('/video_feed')
 def video_feed():
     """Stream live video feed with detections."""
+    logger.debug("Accessing video feed")
     def stream():
         global frame
         while is_streaming:
             with lock:
                 if frame is None:
+                    logger.debug("No frame available")
+                    time.sleep(0.03)
                     continue
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')

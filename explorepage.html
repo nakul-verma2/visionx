@@ -319,6 +319,24 @@
             text-shadow: 0 0 10px var(--glow);
         }
         
+        .camera-feed {
+            display: none;
+            margin: 3rem auto;
+            max-width: 900px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: var(--secondary);
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .camera-feed img {
+            width: 640px;
+            height: 480px;
+            object-fit: cover;
+        }
+        
         .results-container {
             display: none;
             margin: 3rem auto;
@@ -367,24 +385,6 @@
         .result-card p {
             font-size: 1rem;
             font-weight: 400;
-        }
-        
-        .video-container {
-            display: none;
-        }
-        
-        .video-placeholder {
-            width: 100%;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            color: var(--accent);
-            font-size: 1.4rem;
-            letter-spacing: 3px;
-            background: var(--primary);
-            text-shadow: 0 0 10px var(--glow);
         }
         
         .opencv-support {
@@ -462,6 +462,11 @@
             
             .button-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .camera-feed img {
+                width: 100%;
+                height: auto;
             }
         }
         
@@ -557,6 +562,12 @@
                 <div class="preview-container" id="previewContainer">
                     <div class="preview-placeholder" id="previewPlaceholder">UPLOADED IMAGE PREVIEW</div>
                     <img id="previewImage" class="preview-image" src="" alt="Preview" style="display: none;">
+                </div>
+                
+                <div class="camera-feed" id="cameraFeed">
+                    <h3 class="results-title">Live Camera Feed</h3>
+                    <img id="video" src="" alt="Live Video Feed">
+                    <p id="videoError" style="display: none; color: var(--highlight);">Failed to load video feed. Please check your webcam and try again.</p>
                 </div>
                 
                 <div class="results-container" id="resultsContainer">
@@ -667,12 +678,28 @@
         const previewContainer = document.getElementById('previewContainer');
         const previewPlaceholder = document.getElementById('previewPlaceholder');
         const previewImage = document.getElementById('previewImage');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const video = document.getElementById('video');
+        const videoError = document.getElementById('videoError');
         const progressIndicator = document.getElementById('progressIndicator');
         const resultsContainer = document.getElementById('resultsContainer');
         const resultsList = document.getElementById('resultsList');
         
         let uploadedFilename = null;
         let isVideoMode = false;
+        
+        // Handle video feed errors
+        video.onerror = () => {
+            console.error('Video feed failed to load');
+            videoError.style.display = 'block';
+            resultsContainer.style.display = 'block';
+            resultsList.innerHTML = '<div class="result-card"><p>Error: Video feed failed to load. Please check your webcam.</p></div>';
+        };
+        
+        video.onload = () => {
+            console.log('Video feed loaded successfully');
+            videoError.style.display = 'none';
+        };
         
         imageUpload.addEventListener('change', async (event) => {
             const file = event.target.files[0];
@@ -699,7 +726,8 @@
                             previewPlaceholder.style.display = 'none';
                             previewImage.style.display = 'block';
                             previewImage.src = e.target.result;
-                            previewContainer.classList.remove('video-container');
+                            cameraFeed.style.display = 'none';
+                            videoError.style.display = 'none';
                             resultsContainer.style.display = 'none';
                             resultsList.innerHTML = '';
                             isVideoMode = false;
@@ -711,6 +739,8 @@
                         reader.readAsDataURL(file);
                     } else {
                         console.error('Upload failed:', result.error);
+                        resultsContainer.style.display = 'block';
+                        resultsList.innerHTML = '<div class="result-card"><p>Upload failed: ' + result.error + '</p></div>';
                         progressIndicator.style.display = 'none';
                         uploadImageButton.disabled = false;
                         analyzeButton.disabled = true;
@@ -718,6 +748,8 @@
                     }
                 } catch (error) {
                     console.error('Error uploading image:', error);
+                    resultsContainer.style.display = 'block';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error uploading image</p></div>';
                     progressIndicator.style.display = 'none';
                     uploadImageButton.disabled = false;
                     analyzeButton.disabled = true;
@@ -738,9 +770,9 @@
                 const response = await fetch(`/analyze_image/${uploadedFilename}`);
                 const result = await response.json();
                 if (response.ok) {
-                    // Display the backend-generated image with bounding boxes
                     previewImage.src = result.image;
-                    // Display detection results
+                    cameraFeed.style.display = 'none';
+                    videoError.style.display = 'none';
                     resultsContainer.style.display = 'block';
                     resultsList.innerHTML = result.detections.length > 0
                         ? result.detections.map(d => `
@@ -753,7 +785,7 @@
                 } else {
                     console.error('Analysis failed:', result.error);
                     resultsContainer.style.display = 'block';
-                    resultsList.innerHTML = '<div class="result-card"><p>Error analyzing image</p></div>';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error analyzing image: ' + result.error + '</p></div>';
                 }
             } catch (error) {
                 console.error('Error analyzing image:', error);
@@ -767,7 +799,6 @@
             }
         });
         
-        // Live video feed toggle
         liveVideoButton.addEventListener('click', async () => {
             if (isVideoMode) return;
             
@@ -783,10 +814,9 @@
                 const result = await response.json();
                 if (response.ok) {
                     isVideoMode = true;
-                    previewContainer.classList.add('video-container');
-                    previewPlaceholder.style.display = 'none';
-                    previewImage.style.display = 'block';
-                    previewImage.src = '/video_feed';
+                    previewContainer.style.display = 'none';
+                    cameraFeed.style.display = 'block';
+                    video.src = '/video_feed?' + new Date().getTime();
                     resultsContainer.style.display = 'block';
                     resultsList.innerHTML = '<div class="result-card"><p>Live video streaming...</p></div>';
                     analyzeButton.disabled = true;
@@ -795,12 +825,14 @@
                 } else {
                     console.error('Failed to start video:', result.error);
                     resultsContainer.style.display = 'block';
-                    resultsList.innerHTML = '<div class="result-card"><p>Error starting video</p></div>';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error starting video: ' + result.error + '</p></div>';
+                    videoError.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error starting video:', error);
                 resultsContainer.style.display = 'block';
                 resultsList.innerHTML = '<div class="result-card"><p>Error starting video</p></div>';
+                videoError.style.display = 'block';
             } finally {
                 progressIndicator.style.display = 'none';
                 uploadImageButton.disabled = false;
@@ -823,7 +855,10 @@
                 const result = await response.json();
                 if (response.ok) {
                     isVideoMode = false;
-                    previewImage.src = '';
+                    video.src = '';
+                    cameraFeed.style.display = 'none';
+                    videoError.style.display = 'none';
+                    previewContainer.style.display = 'block';
                     previewPlaceholder.style.display = 'block';
                     previewImage.style.display = 'none';
                     resultsContainer.style.display = 'block';
@@ -834,7 +869,7 @@
                 } else {
                     console.error('Failed to stop video:', result.error);
                     resultsContainer.style.display = 'block';
-                    resultsList.innerHTML = '<div class="result-card"><p>Error stopping video</p></div>';
+                    resultsList.innerHTML = '<div class="result-card"><p>Error stopping video: ' + result.error + '</p></div>';
                 }
             } catch (error) {
                 console.error('Error stopping video:', error);

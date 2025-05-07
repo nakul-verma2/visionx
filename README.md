@@ -2,8 +2,9 @@
 This project demonstrates real-time object detection using YOLOv8 integrated with OpenCV. Designed to detect custom objects such as fire extinguishers, toolboxes, and oxygen tanks, the solution supports both offline image inference and live webcam detection with GPU acceleration.
 
 ## Live Demo Link 
-https://youtu.be/_CZmuAoGcgo
-https://drive.google.com/file/d/1CRHrsAdgvrFnt1Tlrng6ef3YRtPmlqBh/view?usp=sharing
+[https://youtu.be/_CZmuAoGcgo](https://youtu.be/YIJmG0985mc)
+
+[https://drive.google.com/file/d/1CRHrsAdgvrFnt1Tlrng6ef3YRtPmlqBh/view?usp=sharing](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)
 
 ## 📌 Features
 * 🚀 YOLOv8-powered object detection

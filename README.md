@@ -21,6 +21,14 @@ This project demonstrates real-time object detection using YOLOv8 integrated wit
 
 * 📊 Evaluation metrics on test data
 
+## Live Preview
+
+![Demo Screenshot](Reports/live.png)
+
+## Documentation
+
+https://visionxdocumentation.netlify.app/
+
 ## 📁 Directory Structure
 ```bash
 .

@@ -23,7 +23,7 @@ This project demonstrates real-time object detection using YOLOv8 integrated wit
 
 ## Live Preview
 
-![Demo Screenshot](Reports/WhatsApp Image 2025-05-07 at 12.02.51 PM.jpeg)
+![Demo Screenshot](Reports/live.png)
 
 ## Documentation
 

@@ -2,6 +2,7 @@
 This project demonstrates real-time object detection using YOLOv8 integrated with OpenCV. Designed to detect custom objects such as fire extinguishers, toolboxes, and oxygen tanks, the solution supports both offline image inference and live webcam detection with GPU acceleration.
 
 ## Live Demo Link 
+https://youtu.be/_CZmuAoGcgo
 https://drive.google.com/file/d/1CRHrsAdgvrFnt1Tlrng6ef3YRtPmlqBh/view?usp=sharing
 
 ## 📌 Features
@@ -62,7 +63,7 @@ names: ['FireExtinguisher', 'ToolBox', 'OxygenTank']
 Then run:
 
 ```bash
-python train.py
+python app.py
 ```
 You can modify hyperparameters like epochs, learning rate, batch size directly in the script or via CLI args.
 

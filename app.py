@@ -105,7 +105,7 @@ def upload_image():
         return jsonify({'message': 'Image uploaded', 'filename': filename}), 200
 
 @app.route('/analyze_image/<filename>', methods=['GET'])
-def analyze_image():
+def analyze_image(filename):
     """Analyze uploaded image using YOLOv8 and return the processed image."""
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if not os.path.exists(file_path):

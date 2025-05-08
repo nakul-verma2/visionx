@@ -1,64 +1,77 @@
-# 🔍 Real-Time Object Detection with YOLOv8 & OpenCV
-This project demonstrates real-time object detection using YOLOv8 integrated with OpenCV. Designed to detect custom objects such as fire extinguishers, toolboxes, and oxygen tanks, the solution supports both offline image inference and live webcam detection with GPU acceleration.
+# 🔥 Real-Time Object Detection with YOLOv8 & OpenCV  
+**Detect Fire Extinguishers, Toolboxes, and Oxygen Tanks in Space Stattions**  
 
-## Live Demo Link 
-[https://youtu.be/_CZmuAoGcgo](https://youtu.be/YIJmG0985mc)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)  
+[![Ultralytics YOLOv8](https://img.shields.io/badge/Ultralytics-YOLOv8-green.svg)](https://github.com/ultralytics/ultralytics)  
+[![OpenCV](https://img.shields.io/badge/OpenCV-RealTime-blue)](https://opencv.org/)
 
-[https://drive.google.com/file/d/1CRHrsAdgvrFnt1Tlrng6ef3YRtPmlqBh/view?usp=sharing](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)
+---
 
-## 📌 Features
-* 🚀 YOLOv8-powered object detection
+## 🎥 Live Demo  Link
+▶️ [YouTube Live Inference Video](https://youtu.be/YIJmG0985mc)  
+📂 [Demo)](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)  
+📘 [Full Documentation](https://visionxdocumentation.netlify.app/)
 
-* 🎥 Live detection using OpenCV and webcam
+---
 
-* 🖼️ Inference on custom test image datasets
+## 📸 Sample Output  
+![Live Detection](Reports/live.png)
 
-* 🧠 Training from scratch on custom data
+---
 
-* 💾 Auto-saving of predicted images and bounding box labels
+## 🚀 Overview  
+This project showcases a real-time object detection system built using **YOLOv8** and **OpenCV**, tailored to recognize critical safety equipment in industrial settings:
 
-* 🧼 GPU memory management & OOM error handling
+- 🔥 Fire Extinguishers  
+- 🧰 Toolboxes  
+- 🧪 Oxygen Tanks  
 
-* 📊 Evaluation metrics on test data
+The solution includes support for:
+- Static image inference  
+- Live webcam detection  
+- Training from scratch on a custom dataset  
+- GPU acceleration and memory optimization
 
-## Live Preview
+---
 
-![Demo Screenshot](Reports/live.png)
-
-## Documentation
-
-https://visionxdocumentation.netlify.app/
-
-## 📁 Directory Structure
+## 📁 Project Structure
 ```bash
 .
-├── train.py                 # Training script with custom params
-├── infer_images.py         # Static test image inference
-├── live_detect.py          # Real-time webcam detection (optional)
+├── train.py                # Training script with custom params
+├── predict.py          # Real-time webcam detection (optional)
+├── VisionX_Model.ipynb       # Google Collab Notebook
 ├── yolo_params.yaml        # Configuration file (paths, classes, params)
 ├── data/
 │   ├── train/
 │   ├── val/
 │   └── test/
 ├── runs/                   # YOLOv8 training results
-└── predictions/            # Saved predictions and labels
 ```
-## 🛠 Requirements
-* Python ≥ 3.8
 
-* Ultralytics YOLOv8
+## ✨ Features  
+- 🧠 YOLOv8-based custom model trained on safety equipment  
+- ⚡ GPU-enabled real-time inference  
+- 🎥 Live webcam stream object detection  
+- 🖼️ Static image testing with bounding box export  
+- 📉 Evaluation metrics (mAP, confusion matrix, failure cases)  
+- 🧼 GPU memory auto-clear and OOM error handling  
+- 📥 Organized outputs and predictions  
 
-* OpenCV
 
-* PyTorch (with GPU support)
+## ⚙️ Installation & Setup
 
-* PyYAML
-
-## Install dependencies:
-
+### 1. Clone the Repository
 ```bash
-pip install ultralytics opencv-python pyyaml torch
+git clone https://github.com/nakul-verma2/visionx
+
+
+## 2. Install dependencies:
+```bash
+pip install -r requirements.txt
+pip install ultralytics opencv-python pyyaml torch  [Manual]
 ```
+
 ## 🏋️‍♂️ Training
 Update yolo_params.yaml with your custom dataset paths and classes:
 
@@ -77,16 +90,17 @@ python app.py
 You can modify hyperparameters like epochs, learning rate, batch size directly in the script or via CLI args.
 
 
-## 🎥 Live Detection with Webcam
-Enable live detection using OpenCV:
-
-```bash
-python live_detect.py
-```
-Make sure your webcam is connected and accessible.
-
 ## 📊 Evaluation
 Validation metrics are generated after inference using the model's .val() method on your test set.
+
+## 📝 Reporting
+A detailed report is included with:
+Training methodology
+Challenges and mitigation
+Model improvements
+Failure case analysis
+
+📄 Full report available in Reports/ directory.
 
 ## 📌 Notes
 Previous training results are stored in separate runs/detect/train* folders. You can delete old ones if storage is a concern.
@@ -97,3 +111,8 @@ AMP (mixed precision) is enabled by default for faster training.
 
 ## 💬 License
 This project is licensed under the MIT License. Feel free to use and modify it for personal or commercial projects.
+
+
+
+
+

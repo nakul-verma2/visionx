@@ -1,0 +1,8 @@
+ultralytics
+opencv-python
+torch
+pyyaml
+numpy
+matplotlib
+tqdm
+scipy

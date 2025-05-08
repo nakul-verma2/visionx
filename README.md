@@ -11,7 +11,7 @@
 ## 🎥 Live Demo  Link
 ▶️ [YouTube Live Inference Video](https://youtu.be/YIJmG0985mc)  
 📂 [Demo)](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)  
-📘 [Full Documentation](https://visionxdocumentation.netlify.app/)
+📘 [Full Documentation & Reports](https://visionxdocumentation.netlify.app/)
 
 ---
 

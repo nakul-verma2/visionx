@@ -42,16 +42,21 @@ The solution includes support for:
 
 ## 📁 Project Structure
 ```bash
-.
-├── train.py                # Training script with custom params
-├── predict.py          # Real-time webcam detection (optional)
-├── VisionX_Model.ipynb       # Google Collab Notebook
-├── yolo_params.yaml        # Configuration file (paths, classes, params)
-├── data/
-│   ├── train/
-│   ├── val/
-│   └── test/
-├── runs/                   # YOLOv8 training results
+visionx/
+├── analyse.py              # Script for analyzing model performance
+├── app.py                  # Main application script for running the web interface
+├── live.py                 # Script for real-time object detection using webcam or video stream
+├── explorepage.html        # HTML template for the exploration page
+├── visionx.html            # Main HTML template for the web interface
+├── requirements.txt        # List of Python dependencies
+├── README.md               # Project documentation
+├── LICENSE                 # MIT License file
+├── YOLOv8_Pipeline.zip     # Compressed pipeline for YOLOv8 setup
+├── images/                 # Directory containing sample images and assets
+├── model/                  # Directory for storing trained YOLOv8 model files
+├── uploads/                # Directory for storing uploaded images for inference
+├── Reports/                # Directory containing evaluation reports and logs
+└── Failure Cases/          # Directory with examples of failed detections for analysis
 ```
 
 ## ✨ Features  

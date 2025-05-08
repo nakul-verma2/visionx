@@ -20,6 +20,11 @@
 
 ---
 
+## 📸 Model Score
+![Score](Reports/score.png)
+
+---
+
 ## 🚀 Overview  
 This project showcases a real-time object detection system built using **YOLOv8** and **OpenCV**, tailored to recognize critical safety equipment in industrial settings:
 

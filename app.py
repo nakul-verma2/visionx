@@ -132,8 +132,7 @@ def analyze_image(filename):
             })
 
         # Draw detections on image
-        img_annotated = result.plot()
-        img_bgr = cv2.cvtColor(img_annotated, cv2.COLOR_RGB2BGR)
+        img_bgr = result.plot()
 
         # Resize image to fixed size for frontend
         target_width = 640

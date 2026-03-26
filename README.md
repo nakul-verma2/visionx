@@ -1,3 +1,13 @@
+---
+title: VisionX
+emoji: 🔥
+colorFrom: red
+colorTo: blue
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 🔥 Real-Time Object Detection with YOLOv8 & OpenCV  
 **Detect Fire Extinguishers, Toolboxes, and Oxygen Tanks in Space Stattions**  
 

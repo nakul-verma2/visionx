@@ -1,0 +1,26 @@
+.git
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv*/
+.venv/
+bin/
+lib/
+include/
+pip-selfcheck.json
+*.ipynb
+Reports/
+"Failure Cases/"
+Failure Cases/
+uploads/
+visionx_uploads/
+images/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.pytest_cache/
+.tox/
+.DS_Store

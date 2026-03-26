@@ -1,8 +1,10 @@
+flask
+flask-cors
 ultralytics
-opencv-python
+opencv-python-headless
 torch
-pyyaml
 numpy
+pyyaml
 matplotlib
-tqdm
 scipy
+tqdm

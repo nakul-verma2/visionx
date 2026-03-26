@@ -4,7 +4,7 @@ from glob import glob
 import cv2
 
 # Load the model
-model = YOLO("runs/train/hardcase_exp/weights/best.pt")  # Adjust path if needed
+model = YOLO("runs/train/hardcase_exp/weights/best.pt")  
 
 # Path to your test images folder
 test_images_folder = "hard_cases/images"  # Adjust this path if different

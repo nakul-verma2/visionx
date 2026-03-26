@@ -10,7 +10,9 @@
 
 ## 🎥 Live Demo  Link
 ▶️ [YouTube Live Inference Video](https://youtu.be/YIJmG0985mc)  
-📂 [Demo)](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)  
+
+📂 [(Demo)](https://drive.google.com/file/d/1rEJLyOR0bcBAR9EdYqOND9v9tzY8BO5y/view?usp=sharing)  
+
 📘 [Full Documentation & Reports](https://visionxdocumentation.netlify.app/)
 
 ---
@@ -74,7 +76,7 @@ visionx/
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/nakul-verma2/visionx
-
+```
 
 ## 2. Install dependencies:
 ```bash
